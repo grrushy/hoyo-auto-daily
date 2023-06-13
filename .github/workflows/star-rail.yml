@@ -17,33 +17,33 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  deploy-pypi:
     runs-on: ubuntu-latest
-    env:
-      LANG: zh-cn
-    # Steps represent a sequence of tasks that will be executed as part of the job
+    permissions:
+      id-token: write
+    environment:
+      name: pypi
+      url: https://pypi.org/p/hoyo-daily-logins-helper
     steps:
-    
-      - uses: szenius/set-timezone@v1.2
-        with:
-          timezoneLinux: "Asia/Singapore"
-          timezoneMacos: "Asia/Singapore"
-          timezoneWindows: "Singapore Standard Time"
-
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+      - name: Build package
+        run: |
+          pip install build
+          make build
+      - name: Publish package to pypi
+        uses: pypa/gh-action-pypi-publish@release/v1
         
-      - name: Setup Python
-        uses: actions/setup-python@v4.6.0
-          
-      - name: Install requirement
-        run: pip install hoyo-daily-logins-helper
-      - name: daily
+      - name: Daily
         run: HOYO_LANGUAGE=zh-cn hoyo-daily-logins-helper --cookie="${{ secrets.HOYO_COOKIE }}" --starrail  &> output.log
       
-      - name: upload
+      - name: Upload Log File
         run: |
           month=$(date +'%Y/%m')
           day=$(date +'%Y/%m/%d')
