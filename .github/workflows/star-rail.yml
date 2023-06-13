@@ -43,16 +43,3 @@ jobs:
       - name: Daily
         run: HOYO_LANGUAGE=zh-cn hoyo-daily-logins-helper --cookie="${{ secrets.HOYO_COOKIE }}" --starrail  &> output.log
       
-      - name: Upload Log File
-        run: |
-          month=$(date +'%Y/%m')
-          day=$(date +'%Y/%m/%d')
-          mkdir -p "$month"
-          mv output.log "$day.log"
-          # Configure git
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          # Commit and push the log file
-          git add "$day.log"
-          git commit -m "$day.log"
-          git push
